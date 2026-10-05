@@ -1,0 +1,7 @@
+Option "éditeur de circuit" qui permet de créer des nouveaux circuits (avec une limite max)
+Faire un bonus boost à utilisation (de 100% à 0%)
+Ajouter des bots
+Faire un mode de jeu contre la montre
+Faire un mode de jeu défi
+Ajout de météo (quand il pleut on dérape plus facilement même sur du goudron, etc)
+Dash/front flip qui tp de 2 tiles (par ex) pour éviter un obstacle
