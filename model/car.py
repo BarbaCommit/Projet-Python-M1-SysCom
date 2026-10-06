@@ -85,11 +85,23 @@ class Car:
         rect = rotated.get_rect(center=(int(self.x), int(self.y)))
         return rotated, rect
     
-    def respawn(self,x:float,y:float,angle:float = 90.0):
+    def respawn(self,x:float,y:float,angle:float = 90.0) -> None:
         self.x = x
         self.y = y
         self.vx = 0.0
         self.vy = 0.0
         self.angle = angle
         self.angular_speed = 0.0
-        
+
+    def get_hitbox(self) -> list[tuple[float,float,float]]:
+        rad = math.radians(self.angle)
+        cos_a, sin_a = math.cos(rad), math.sin(rad)
+        width,height = CAR_WIDTH/2, CAR_HEIGHT/2
+        corners = []
+        gaps = [(-width,-height),(width,-height),(width,height),(-width,height)]
+
+        for x,y in gaps:
+            rot_x = self.x + (x*cos_a - y*sin_a)
+            rot_y = self.y + (x*sin_a + y*cos_a)
+            corners.append((rot_x,rot_y))
+        return corners

@@ -41,11 +41,16 @@ class GameModel:
                      (8*TILE_SIZE + TILE_SIZE //2,1*TILE_SIZE+TILE_SIZE//2)
         ]
         for i,c in enumerate(self.cars):
+            old_x, old_y, old_angle = c.x, c.y, c.angle
             tile = self.circuit.get_tile_at_pixel(c.x,c.y)
             if tile is None or isinstance(tile,TILE_MAPPING.get("V")):
                 spawn_x,spawn_y = spawn_pos[i]
                 c.respawn(spawn_x,spawn_y,angle=90.0)
                 continue
+            if self.check_collisions(c):
+                c.x,c.y,c.angle = old_x,old_y,old_angle
+                c.vx *= -0.5
+                c.vy *= -0.5
             friction = tile.friction_factor
             c.update_position(tile_friction=friction)
             
@@ -84,4 +89,13 @@ class GameModel:
             self.selected_colors[self.index_selection_courant] = color
             self.index_selection_courant = (self.index_selection_courant+1)%2
             return True
+        return False
+
+    def check_collisions(self,car : Car) -> bool:
+        if self.circuit is None:
+            return False
+
+        for car_x, car_y in car.get_hitbox(): 
+            if car_x < 0 or car_x >= self.circuit.pixel_width() or car_y < 0 or car_y >= self.circuit.pixel_height():
+                return True
         return False
