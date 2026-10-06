@@ -41,16 +41,13 @@ class GameModel:
                      (8*TILE_SIZE + TILE_SIZE //2,1*TILE_SIZE+TILE_SIZE//2)
         ]
         for i,c in enumerate(self.cars):
-            old_x, old_y, old_angle = c.x, c.y, c.angle
+            
             tile = self.circuit.get_tile_at_pixel(c.x,c.y)
             if tile is None or isinstance(tile,TILE_MAPPING.get("V")):
                 spawn_x,spawn_y = spawn_pos[i]
                 c.respawn(spawn_x,spawn_y,angle=90.0)
                 continue
-            if self.check_collisions(c):
-                c.x,c.y,c.angle = old_x,old_y,old_angle
-                c.vx *= -0.5
-                c.vy *= -0.5
+            self.check_collisions(c)
             friction = tile.friction_factor
             c.update_position(tile_friction=friction)
             
@@ -91,11 +88,34 @@ class GameModel:
             return True
         return False
 
-    def check_collisions(self,car : Car) -> bool:
+    def check_collisions(self,car : Car) -> None:
         if self.circuit is None:
             return False
+        
+        map_width, map_height = self.circuit.pixel_width(),self.circuit.pixel_height()
+        hitbox = car.get_hitbox()
 
-        for car_x, car_y in car.get_hitbox(): 
-            if car_x < 0 or car_x >= self.circuit.pixel_width() or car_y < 0 or car_y >= self.circuit.pixel_height():
-                return True
-        return False
+        out_x, out_y = 0.0, 0.0
+
+
+        for car_x, car_y in hitbox:
+            if car_x < 0:
+                out_x = max(out_x,-car_x)
+            elif car_x >= map_width:
+                out_x = min(out_x,map_width-1-car_x)
+            
+            if car_y < 0:
+                out_y = max(out_y,-car_y)
+            elif car_y >= map_height:
+                out_y = min(out_y,map_height-1-car_y)
+        if out_x != 0 or out_y != 0:
+            car.x += out_x
+            car.y += out_y
+
+            if out_x != 0:
+                car.vx = -car.vx *0.3
+                car.vy *= 0.85
+            if out_y != 0:
+                car.vy = -car.vy *0.3
+                car.vx *= 0.85
+            return
